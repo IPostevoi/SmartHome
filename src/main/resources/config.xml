@@ -1,0 +1,49 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+       xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:aop="http://www.springframework.org/schema/aop"
+       xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans.xsd http://www.springframework.org/schema/context http://www.springframework.org/schema/context/spring-context.xsd http://www.springframework.org/schema/aop http://www.springframework.org/schema/aop/spring-aop.xsd">
+
+    <aop:aspectj-autoproxy>
+        <aop:include name="homeLogger"/>
+    </aop:aspectj-autoproxy>
+
+    <bean id="homeLogger" class="ru.sbt.mipt.oop.HomeLogger"/>
+
+    <bean class="org.springframework.beans.factory.annotation.AutowiredAnnotationBeanPostProcessor" />
+
+    <bean id = "homeReader" class = "ru.sbt.mipt.oop.utils.JsonReader">
+    </bean>
+
+    <bean id="homeSaver" class="ru.sbt.mipt.oop.utils.HomeSaverImpl">
+    </bean>
+
+    <bean id="homeUtils" class="ru.sbt.mipt.oop.utils.HomeUtils">
+        <property name="properties" value="/home/bakla410/Desktop/МФТИ/9 семестр/SBT/SmartHome/src/main/resources/app.properties" />
+    </bean>
+
+    <bean id = "eventListener" class = "ru.sbt.mipt.oop.EventExecutors.EventListenerImpl">
+    </bean>
+
+    <bean id="doorEventProcessor" class="ru.sbt.mipt.oop.EventExecutors.DoorEventProcessorImpl">
+    </bean>
+
+    <bean id="lightEventProcessor" class="ru.sbt.mipt.oop.EventExecutors.LightEventProcessorImpl">
+    </bean>
+
+    <bean id = "observable" class = "ru.sbt.mipt.oop.EventExecutors.EventsObservable">
+        <property name="eventContainer">
+                  <list value-type="ru.sbt.mipt.oop.EventExecutors.Observer">
+                          <ref bean="doorEventProcessor"/>
+                          <ref bean="lightEventProcessor"/>
+                  </list>
+        </property>
+    </bean>
+
+    <bean id="logger" class="org.apache.log4j.Logger" factory-method="getLogger">
+        <constructor-arg type="java.lang.String" value="my.Logger" />
+    </bean>
+
+    <bean id = "main" class = "ru.sbt.mipt.oop.Main">
+    </bean>
+
+</beans>
