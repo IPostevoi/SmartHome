@@ -9,7 +9,6 @@ import ru.sbt.mipt.oop.utils.HomeUtils;
 /**
  * Created by bakla410 on 16.12.17.
  */
-//@Component
 public class Main {
 
     @Autowired

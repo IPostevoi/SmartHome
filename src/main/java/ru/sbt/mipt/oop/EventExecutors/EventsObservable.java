@@ -3,6 +3,7 @@ package ru.sbt.mipt.oop.EventExecutors;
 import ru.sbt.mipt.oop.SensorEvent;
 import ru.sbt.mipt.oop.dto.SmartHome;
 
+import java.util.ArrayList;
 import java.util.List;
 
 /**
@@ -10,7 +11,7 @@ import java.util.List;
  */
 public class EventsObservable implements Observable {
 
-    private List<Observer> eventContainer;
+    private List<Observer> eventContainer = new ArrayList<>();
 
     @Override
     public void add(Observer processor) {

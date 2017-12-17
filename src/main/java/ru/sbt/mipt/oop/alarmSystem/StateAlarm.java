@@ -16,7 +16,7 @@ public class StateAlarm implements AlarmSystemState {
 
     @Override
     public AlarmSystemState onSensorEvent(SensorEvent sensorEvent) {
-        return null;
+        return this;
     }
 
     @Override
