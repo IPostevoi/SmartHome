@@ -4,14 +4,13 @@ import junit.framework.Assert;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
+import org.mockito.invocation.InvocationOnMock;
+import org.mockito.stubbing.Answer;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ApplicationContext;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
-import ru.sbt.mipt.oop.alarmSystem.AlarmStateEnum;
-import ru.sbt.mipt.oop.alarmSystem.AlarmSystem;
-import ru.sbt.mipt.oop.EventExecutors.EventListener;
-import ru.sbt.mipt.oop.EventExecutors.Observable;
+import ru.sbt.mipt.oop.EventExecutors.*;
 import ru.sbt.mipt.oop.SensorEvent;
 import ru.sbt.mipt.oop.dto.Door;
 import ru.sbt.mipt.oop.dto.Light;
@@ -23,8 +22,7 @@ import ru.sbt.mipt.oop.utils.HomeUtils;
 import java.util.ArrayList;
 import java.util.Arrays;
 
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.when;
+import static org.mockito.Mockito.*;
 
 /**
  * Created by bakla410 on 16.12.17.
@@ -66,30 +64,51 @@ public class TestHome {
     }
 
     @Test
-    public void integrationTest() {
+    public void compositeTest() {
 
+        LightOn lightOn = mock(LightOn.class);
         EventListener listener = mock(EventListener.class);
-
         when(listener.listen()).thenReturn(new SensorEvent(SensorEventType.LIGHT_ON, "1"));
+        SensorEvent sensorEvent = listener.listen();
 
-        ((Observable) context.getBean("observable")).notifyObservers(smartHome, listener.listen());
+        LightEventProcessorImpl lightEventProcessor = mock(LightEventProcessorImpl.class);
+        DoorEventProcessorImpl doorEventProcessor = new DoorEventProcessorImpl();
 
-        Light light =((Light) ((Room) smartHome.getRooms().toArray()[0]).getLights().toArray()[0]);
+        EventsObservable observable = new EventsObservable();
+        observable.add(lightEventProcessor);
+        observable.add(doorEventProcessor);
+        doAnswer(new Answer() {
+            @Override
+            public Object answer(InvocationOnMock invocationOnMock) throws Throwable {
+                smartHome.processAction(lightOn, sensorEvent);
+                return null;
+            }
+        }).when(lightEventProcessor).processEvent(smartHome, sensorEvent);
 
-        Assert.assertEquals(true, light.isOn());
+
+        observable.notifyObservers(smartHome, sensorEvent);
+        verify(lightOn).execute(smartHome, sensorEvent);
+        verify(lightOn).execute(smartHome.getRooms().toArray()[0], sensorEvent);
 
     }
 
     @Test
-    public void alarmSystem() {
-        AlarmSystem system = new AlarmSystem("12345");
-        system.turnOn();
-        Assert.assertEquals(system.getState().equals(AlarmStateEnum.WAIT), true);
-        system.enterPassword("12345");
-        Assert.assertEquals(system.getState().equals(AlarmStateEnum.ON), true);
-        system.turnOff();
-        Assert.assertEquals(system.getState().equals(AlarmStateEnum.WAIT), true);
+    public void eventObserverTest() {
+
+        SensorEvent sensorEvent = mock(SensorEvent.class);
+        LightEventProcessorImpl lightEventProcessor = mock(LightEventProcessorImpl.class);
+        DoorEventProcessorImpl doorEventProcessor = mock(DoorEventProcessorImpl.class);
+        EventsObservable observable = new EventsObservable();
+        observable.add(lightEventProcessor);
+        observable.add(doorEventProcessor);
+
+        observable.notifyObservers(smartHome, sensorEvent);
+        verify(doorEventProcessor).processEvent(smartHome, sensorEvent);
+        verify(lightEventProcessor).processEvent(smartHome, sensorEvent);
     }
+
+
+
 
 
 }

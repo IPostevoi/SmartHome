@@ -22,7 +22,7 @@ public class StateWait implements AlarmSystemState {
 
     @Override
     public AlarmSystemState onSensorEvent(SensorEvent sensorEvent) {
-        return null;
+        return this;
     }
 
     @Override
